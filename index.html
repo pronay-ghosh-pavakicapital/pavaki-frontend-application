@@ -1,13 +1,70 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pavaki-frontend-application</title>
-  </head>
-  <body>
+    
+    <!-- Primary Meta Tags -->
+    <title>Pavaki Capital</title>
+    <meta name="title" content="Pavaki Capital" />
+    <meta name="description" content="Pavaki Capital provides comprehensive stock market analysis, investment strategies, and financial insights. Get expert stock recommendations, market research, and portfolio management solutions." />
+    <meta name="keywords" content="Pavaki Capital, stock market, investment, financial analysis, stock recommendations, portfolio management, market research, trading, equity analysis" />
+    <meta name="author" content="Pavaki Capital" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.pavakicapital.com/" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.pavakicapital.com/" />
+    <meta property="og:title" content="Pavaki Capital" />
+    <meta property="og:description" content="Expert stock market analysis and investment strategies. Get professional financial insights and portfolio management solutions at Pavaki Capital." />
+    <meta property="og:image" content="https://www.pavakicapital.com/og-image.jpg" />
+    <meta property="og:site_name" content="Pavaki Capital" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.pavakicapital.com/" />
+    <meta name="twitter:title" content="Pavaki Capital" />
+    <meta name="twitter:description" content="Expert stock market analysis and investment strategies. Get professional financial insights and portfolio management solutions." />
+    <meta name="twitter:image" content="https://www.pavakicapital.com/twitter-image.jpg" />
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FinancialService",
+      "name": "Pavaki Capital",
+      "url": "https://www.pavakicapital.com",
+      "logo": "https://www.pavakicapital.com/logo.png",
+      "description": "Professional stock market analysis and investment solutions",
+      "serviceType": ["Investment Advisory", "Stock Analysis", "Portfolio Management"],
+      "areaServed": "Worldwide",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+1-XXX-XXX-XXXX",
+        "contactType": "Customer Service",
+        "availableLanguage": "English"
+      }
+    }
+    </script>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/src/main.tsx" as="script" />
+    
+    <!-- DNS Prefetch for external resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//api.financialdata.com" />
+</head>
+<body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-  </body>
+</body>
 </html>
