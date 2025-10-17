@@ -25,6 +25,8 @@ const Strings = {
     // static one
     emailAddress: 'Email Address',
     forgetPassword: 'Forgot Password',
+    dontHaveAccount: 'Don\'t have account',
+    clickHere: 'Click here',
     password: 'Password',
     confirmPassword: 'Confirm Password',
     newPassword: 'New Password',
@@ -32,6 +34,7 @@ const Strings = {
     verifyEmailSubText: 'Enter your registered email address',
     resetPasswordSubText: 'Reset password in your Pavaki account',
     signIn: 'Sign In',
+    continue: 'Continue',
     signUp: 'Sign Up',
     or: 'Or',
     signUpSubText: 'Sign up to your Pavaki account',

@@ -13,6 +13,7 @@ export default {
         'gray-light': '#CCCCCC',
         'bg-secondary': '#404040',
         'bg-tertiary': '#2C2C2C',
+        'gray-lighter': '#B3B3B3',
         success: '#1F933C',
         error: '#F51111',
       },

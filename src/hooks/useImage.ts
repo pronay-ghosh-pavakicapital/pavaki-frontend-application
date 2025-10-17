@@ -26,10 +26,9 @@ interface UseImagesReturn {
 }
 
 export function useImages(): UseImagesReturn {
-
     return {
         getImage: (imageKey: keyof Omit<AppImages, 'addWhite'>) => {
-            return Images.getImagePath(imageKey);
+            return Images.getImagePath(Images.appImages[imageKey]);
         },
     };
 }
