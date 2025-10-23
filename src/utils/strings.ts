@@ -41,7 +41,6 @@ const Strings = {
     manual: 'Manual',
     csvUpload: 'CSV Upload',
     startAnalyzing: 'Start Analyzing',
-    multipleTickersText: 'Track multiple stock tickers, compare real-time metrics, and generate in-depth financial reports with ease.',
     addStock: 'Add Stock',
     searchStock: 'Search for stock',
     overview: 'Overview',
