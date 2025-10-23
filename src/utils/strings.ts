@@ -57,6 +57,7 @@ const Strings = {
     cfoOILFY: 'CFO (OI) LFY',
     cfoOIHistorical: 'CFO (OI) Historical',
     cfoRevenue: 'CFO Revenue',
+    filter: 'Filter',
     cfoRevenueLfy: 'CFO Revenue LFY',
     cfoRevenueHistorical: 'CFO Revenue Historical',
     fcff: 'FCFF (TTM)',

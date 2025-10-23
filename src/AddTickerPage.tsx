@@ -191,14 +191,13 @@ function AddTickerPage() {
                     />
 
                     <FilterModal
-                        isOpen={true}
+                        isOpen={isFilterModelOpen}
                         onClose={() => {
                             setIsFilterModelOpen(false);
                             setSelectedStockIndex(null);
                         }}
                         onSubmit={handleFilterSubmit}
                         initialData={selectedStockIndex !== null ? stocks[selectedStockIndex].filterData : null}
-                        stockName={selectedStockIndex !== null ? stocks[selectedStockIndex].name || 'Stock' : 'Stock'}
                     />
                 </div>
             </main>
