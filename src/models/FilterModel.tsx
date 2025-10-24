@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getData } from "country-list";
 import type { FilterModel } from "../data_models/FilterDataModel";
 import Strings from "../utils/strings";
@@ -162,6 +162,45 @@ const FilterModal: React.FC<FilterModalProps> = ({
         }
     );
     const isMobile = useMobile();
+
+    // Reset form when initialData changes (when user switches between stocks)
+    useEffect(() => {
+        const defaultFormData = {
+            countryOfIncorpation: "US",
+            industryUS: "",
+            industryGlobal: "",
+            rdExpanses: true,
+            operatingLease: true,
+            nonOperatingAssets: 12345,
+            taxValue: 8.67,
+            compoundRevenue: -3.91,
+            convergence: 3.00,
+            employeeOutstanding: true,
+            optionsOutstanding: 0,
+            strikePrice: 0.00,
+            maturityPrice: 0.00,
+            standardDeviation: 44.54,
+            costOfCaptialAssumption: true,
+            costOfCaptialAfterTen: 8.00,
+            failureAssumption: true,
+            probabilityFailure: 12.00,
+            failureTie: "V",
+            fairValue: 50.00,
+            taxRateAssumption: true,
+            nolAssumption: false,
+            nolCarringValue: 250,
+            growthRateAssumption: true,
+            growthRatePerpetutity: 1.00,
+            trappedCashAssumption: true,
+            trappedCashValue: 140000.00,
+            taxRateTrappedValue: 250.00,
+            comments: "",
+        };
+
+        setFormData(initialData || defaultFormData);
+        setCurrencyDisplay({});
+        setPercentDisplay({});
+    }, [initialData]);
 
     const handleChange = (field: keyof FilterModel, value: any): void => {
         setFormData((prev) => ({

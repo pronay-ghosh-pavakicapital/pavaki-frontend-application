@@ -23,6 +23,7 @@ const Strings = {
     pleaseWait: 'Please wait...',
 
     // static one
+    name: 'Full name',
     emailAddress: 'Email Address',
     forgetPassword: 'Forgot Password',
     dontHaveAccount: 'Don\'t have account',
@@ -43,10 +44,12 @@ const Strings = {
     startAnalyzing: 'Start Analyzing',
     addStock: 'Add Stock',
     searchStock: 'Search for stock',
-    overview: 'Overview',
-    compare: 'Compare',
     exportCSV: 'Export CSV Report',
     exportPDF: 'Export PDF Report',
+    // start of tab bar
+    overview: 'Overview',
+    compare: 'Compare',
+    finalOutput: 'Final Output',
     pastYear: 'Past Year',
     inputSheet: 'Input Sheet',
     valuation: 'Valuation',
@@ -78,6 +81,8 @@ const Strings = {
     storiesNumbers: 'Stories to Numbers',
     optionValue: 'Option value',
     simulationSheet: 'Simulation Sheet',
+    // end of tab bar
+
     yes: 'Yes',
     no: 'No',
 }

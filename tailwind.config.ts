@@ -15,6 +15,7 @@ export default {
         'bg-secondary': '#404040',
         'bg-tertiary': '#2C2C2C',
         'bg-tertiary-light': '#EFEFEF',
+        'bg-compare-border': '#AEC1EE',
         'gray-lighter': '#B3B3B3',
         success: '#1F933C',
         error: '#F51111',

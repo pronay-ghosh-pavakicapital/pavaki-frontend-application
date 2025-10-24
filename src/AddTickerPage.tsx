@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useImages } from "./hooks/useImage";
 import { useMobile } from "./hooks/useMediaQuery";
 import Strings from "./utils/strings";
@@ -7,9 +7,12 @@ import type { FilterModel } from "./data_models/FilterDataModel";
 import SearchModal from "./models/SearchModel";
 import { useStocksStorage } from "./hooks/useStockStorgae";
 import FilterModal from "./models/FilterModel";
+import ProfileComponent from "./components/ProfileComponent";
+import { useNavigate } from "react-router-dom";
+import LogoutConfirmModal from "./models/LogoutConfirmModal";
 
 interface Stock {
-    id: string | null;
+    id: number | null;
     name: string | null;
     ticker: string | null;
     countryName: string | null;
@@ -19,10 +22,12 @@ interface Stock {
 function AddTickerPage() {
     const isMobile = useMobile();
     const { getImage } = useImages();
+    const navigate = useNavigate();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const initialStocks: Stock[] = [
-        { id: null, name: null, ticker: null, countryName: null, filterData: null },
-        { id: null, name: null, ticker: null, countryName: null, filterData: null },
-        { id: null, name: null, ticker: null, countryName: null, filterData: null },
+        { id: 1, name: null, ticker: null, countryName: null, filterData: null },
+        { id: 2, name: null, ticker: null, countryName: null, filterData: null },
+        { id: 3, name: null, ticker: null, countryName: null, filterData: null },
     ];
     const [isModelOpen, setIsModalOpen] = useState(false);
     const [isFilterModelOpen, setIsFilterModelOpen] = useState(false);
@@ -32,23 +37,44 @@ function AddTickerPage() {
         setStocks,
     } = useStocksStorage(initialStocks);
 
+    useEffect(() => {
+        // Push a history state to detect back button
+        const unblock = () => {
+            // Push a dummy state so back button triggers popstate
+            window.history.pushState(null, '', window.location.href);
+        };
+
+        // Push initial state
+        unblock();
+
+        const handlePopState = () => {
+            // User pressed back - show logout modal
+            setShowLogoutModal(true);
+            // Push state again to keep user on this page
+            window.history.pushState(null, '', window.location.href);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, []);
+
     const handleAddStock = (name: string, ticker: string): void => {
         setStocks(prevStocks => {
-            const nullIndex = prevStocks.findIndex(stock => stock.id === null);
-            if (nullIndex === -1) return prevStocks;
-            
+            const nullIndex = prevStocks.findIndex(stock => stock.ticker === null);
             const updatedStocks = [...prevStocks];
             updatedStocks[nullIndex] = {
-                id: ticker,
+                id: updatedStocks[nullIndex].id,
                 name,
                 ticker,
                 countryName: 'US',
                 filterData: null
             };
-            
-            if (nullIndex >= 2) {
+            if (updatedStocks[nullIndex].id! >= 3) {
                 updatedStocks.push({
-                    id: null,
+                    id: updatedStocks[nullIndex].id! + 1,
                     name: null,
                     ticker: null,
                     countryName: null,
@@ -74,9 +100,23 @@ function AddTickerPage() {
         }
     };
 
-    const handleFilterClick = (index: number): void => {
-        setSelectedStockIndex(index);
-        setIsFilterModelOpen(true);
+    const handleFilterClick = (stockId: number): void => {
+        const index = stocks.findIndex(s => s.id === stockId);
+        if (index !== -1) {
+            console.log('idex', index);
+            console.log('idx111', stocks[index].filterData);
+            setSelectedStockIndex(index);
+            setIsFilterModelOpen(true);
+        }
+    };
+
+    const getButtonStatus = (): boolean => {
+        return stocks.some(stock => stock.id !== null);
+    }
+
+    const handleConfirmLogout = () => {
+        localStorage.clear();
+        navigate(Strings.initialRoute);
     };
 
     return (
@@ -87,11 +127,7 @@ function AddTickerPage() {
                     alt="App Logo"
                     className={`${isMobile ? 'w-40 h-10' : 'w-40 h-15'}`}
                 />
-                <img
-                    src={getImage('profileIcon')}
-                    alt="Profile"
-                    className={`${isMobile ? 'w-5 h-5' : 'w-7 h-7'}`}
-                />
+                <ProfileComponent />
             </header>
             <main className="flex flex-1 items-center justify-center">
                 <div className={`w-full max-w-3xl ${isMobile ? 'px-5' : ''}`}>
@@ -136,12 +172,12 @@ function AddTickerPage() {
                     </div>
                     {/* Stock Cards Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
-                        {stocks.map((stock, index) => (
+                        {stocks.map((stock) => (
                             <div
-                                key={index}
-                                className={`border-2 ${stock.id === null ? 'border-dashed border-primary hover:shadow-lg cursor-pointer' : 'border-primary bg-white'} rounded-xl p-2 md:p-4 transition-shadow duration-200 min-h-[120px] flex items-center justify-center`}
+                                key={stock.id}
+                                className={`border-2 ${stock.ticker === null ? 'border-dashed border-primary hover:shadow-lg cursor-pointer' : 'border-primary bg-white'} rounded-xl p-2 md:p-4 transition-shadow duration-200 min-h-[120px] flex items-center justify-center`}
                                 onClick={() => {
-                                    if (stock.id === null) {
+                                    if (stock.ticker === null) {
                                         setIsModalOpen(true);
                                     }
                                 }}
@@ -163,7 +199,7 @@ function AddTickerPage() {
                                                 className="w-3 h-3 cursor-pointer"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleFilterClick(index);
+                                                    handleFilterClick(stock.id!);
                                                 }}
                                             />
                                         </div>
@@ -178,8 +214,14 @@ function AddTickerPage() {
                     </div>
                     <div className="flex justify-center">
                         <button
-                            onClick={() => { }}
-                            className="w-50 h-10 bg-primary hover:bg-primary text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+                            disabled={getButtonStatus() ? false : true}
+                            onClick={() => {
+                                navigate(Strings.overViewRoute);
+                            }}
+                            className={`w-50 h-10 ${getButtonStatus()
+                                ? 'rounded-lg bg-primary hover:bg-primary cursor-pointer'
+                                : 'rounded-lg bg-gray-light cursor-not-allowed'} 
+                                text-white font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl`}
                         >
                             {Strings.startAnalyzing}
                         </button>
@@ -200,6 +242,11 @@ function AddTickerPage() {
                         initialData={selectedStockIndex !== null ? stocks[selectedStockIndex].filterData : null}
                     />
                 </div>
+                <LogoutConfirmModal
+                    isOpen={showLogoutModal}
+                    onClose={() => setShowLogoutModal(false)}
+                    onConfirm={handleConfirmLogout}
+                />
             </main>
         </div>
     );

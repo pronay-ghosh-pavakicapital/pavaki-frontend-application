@@ -55,8 +55,6 @@ function SignInPage() {
 
     const onGoogleClick = () => { };
 
-    const onAppleClick = () => { };
-
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' && isFormValid && !isLoading) {
             handleSubmit();
@@ -65,6 +63,10 @@ function SignInPage() {
 
     const handleForgotPassword = () => {
         navigate(Strings.verifyEmailRoute);
+    }
+
+    const handleSignupClick = () => {
+        navigate(Strings.signUpRoute);
     }
 
     return (
@@ -140,22 +142,21 @@ function SignInPage() {
                     )}
                 </button>
                 <span className="text-sm font-semibold text-primary mt-5">{Strings.or}</span>
-                <div className="flex items-center justify-center gap-8 mt-5">
-                    <img
-                        src={getImage('googleIcon')}
-                        alt="App Logo"
-                        className="w-5 h-5 cursor-pointer"
-                        onClick={onGoogleClick}
-                    />
-                    <img
-                        src={getImage('appleLogo')}
-                        alt="App Logo"
-                        className="w-5 h-5 cursor-pointer"
-                        onClick={onAppleClick}
-                    />
-
+                <img
+                    src={getImage('googleIcon')}
+                    alt="App Logo"
+                    className="w-5 h-5 cursor-pointer items-center justify-center mt-5"
+                    onClick={onGoogleClick}
+                />
+                <div className="flex gap-1 items-center justify-center mt-5">
+                    <span className="text-sm font-semibold text-gray-dark">{Strings.dontHaveAccount}?</span>
+                    <span 
+                        className="text-sm font-bold text-primary underline cursor-pointer"
+                        onClick={handleSignupClick}
+                    >   
+                        {Strings.clickHere}
+                    </span>
                 </div>
-
             </div>
         </div>
     );

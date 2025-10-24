@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { FilterModel } from "../data_models/FilterDataModel";
 
 interface Stock {
-    id: string | null;
+    id: number | null;
     name: string | null;
     ticker: string | null;
     countryName: string | null;
@@ -17,7 +17,14 @@ const STORAGE_KEY = "stock_tickers_data";
  * @returns Object with stocks state and properly typed setter function
  */
 export const useStocksStorage = (initialStocks: Stock[]) => {
-    const [stocks, setStocksState] = useState<Stock[]>(initialStocks);
+    const [stocks, setStocksState] = useState<Stock[]>(() => {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            return saved ? JSON.parse(saved) : initialStocks;
+        } catch {
+            return initialStocks;
+        }
+    });
     const [error, setError] = useState<string | null>(null);
 
     // Load from localStorage on mount
@@ -40,9 +47,6 @@ export const useStocksStorage = (initialStocks: Stock[]) => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stocks));
     }, [stocks]);
 
-    // Properly typed setter that works with both patterns:
-    // 1. Direct value: setStocks([...])
-    // 2. Callback pattern: setStocks(prevStocks => [...])
     const setStocks = useCallback(
         (value: Stock[] | ((prev: Stock[]) => Stock[])): void => {
             setStocksState(prevStocks => {
@@ -55,8 +59,9 @@ export const useStocksStorage = (initialStocks: Stock[]) => {
         []
     );
 
-    const clearStocks = useCallback((): void => {
+    const clearStocks = () => {
         try {
+            console.log('clear called');
             localStorage.removeItem(STORAGE_KEY);
             setStocksState(initialStocks);
         } catch (err) {
@@ -66,11 +71,11 @@ export const useStocksStorage = (initialStocks: Stock[]) => {
                     : "Failed to clear stocks"
             );
         }
-    }, [initialStocks]);
+    };
 
     return {
         stocks,
-        setStocks,  // ✅ Now properly typed for both patterns
+        setStocks,
         error,
         clearStocks,
     };
