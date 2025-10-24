@@ -30,6 +30,7 @@ function OverviewPage() {
     const [selectedStock, setSelectedStock] = useState<number | null>(null);
     const [comparisonStocks, setComparisonStocks] = useState<number[]>([]);
     const [selectedStockIndex, setSelectedStockIndex] = useState<number | null>(null);
+    const [isZoomModalOpen, setIsZoomModalOpen] = useState(false);
 
     const allTabs = [
         Strings.finalOutput,
@@ -134,6 +135,23 @@ function OverviewPage() {
         };
     }, []);
 
+    // Handle hardware back button for zoom modal
+    useEffect(() => {
+        if (isZoomModalOpen) {
+            const handleZoomPopState = () => {
+                setIsZoomModalOpen(false);
+                window.history.pushState(null, '', window.location.href);
+            };
+
+            window.history.pushState(null, '', window.location.href);
+            window.addEventListener('popstate', handleZoomPopState);
+
+            return () => {
+                window.removeEventListener('popstate', handleZoomPopState);
+            };
+        }
+    }, [isZoomModalOpen]);
+
     const handleConfirmLogout = () => {
         localStorage.clear();
         navigate(Strings.initialRoute);
@@ -187,24 +205,30 @@ function OverviewPage() {
         }
     };
 
-    // Custom scrollbar styling - only for compare table section
+    // Custom scrollbar styling - for compare table section and zoom modal
     const scrollbarStyles = `
-        .compare-scroll-container::-webkit-scrollbar {
+        .compare-scroll-container::-webkit-scrollbar,
+        .zoom-modal-content::-webkit-scrollbar {
             width: 10px;
             height: 10px;
         }
-        .compare-scroll-container::-webkit-scrollbar-track {
+        .compare-scroll-container::-webkit-scrollbar-track,
+        .zoom-modal-content::-webkit-scrollbar-track {
             background: transparent;
         }
-        .compare-scroll-container::-webkit-scrollbar-thumb {
+        .compare-scroll-container::-webkit-scrollbar-thumb,
+        .zoom-modal-content::-webkit-scrollbar-thumb {
             background: #AEC1EE;
             border-radius: 5px;
         }
-        .compare-scroll-container::-webkit-scrollbar-thumb:hover {
+        .compare-scroll-container::-webkit-scrollbar-thumb:hover,
+        .zoom-modal-content::-webkit-scrollbar-thumb:hover {
             background: #98b1e6;
         }
-        .compare-scroll-container {
+        .compare-scroll-container,
+        .zoom-modal-content {
             scrollbar-color: #AEC1EE transparent;
+            scrollbar-gutter: stable;
         }
     `;
 
@@ -413,29 +437,165 @@ function OverviewPage() {
                         // OVERVIEW SECTION
                         <>
                             {/* Selected Stock Name */}
-                            <div className="mb-10 flex-shrink-0">
+                            <div className="mb-4 flex-shrink-0">
                                 <h2 className="text-2xl font-semibold text-gray-dark">
                                     {selectedStock ? stocks.find(s => s.id === selectedStock)?.name : 'No Stock Selected'}
                                 </h2>
                             </div>
 
                             {/* Tab Content */}
-                            <div className="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-bg-compare-border overflow-hidden flex flex-col">
+                            <div className="flex-1 min-h-0 bg-white rounded-xl shadow-sm border border-bg-compare-border overflow-hidden flex flex-col relative">
                                 <div className="overflow-y-auto overflow-x-auto flex-1 min-h-0 p-6">
-                                    <div className="flex items-center justify-between mb-10">
+                                    {/* Tab Header with Zoom Icon */}
+                                    <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10">
                                         <h3 className="text-xl font-medium text-primary">{activeTab}</h3>
-                                        <img 
-                                            src={getImage('expandLogo')}
-                                            className="w-5 h-5"
-                                            onClick={() => {}}
-                                        />
+                                        <button
+                                            onClick={() => setIsZoomModalOpen(true)}
+                                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                            title="Zoom in"
+                                        >
+                                            <img
+                                                src={getImage('expandLogo')}
+                                                className="w-5 h-5"
+                                            />
+                                        </button>
                                     </div>
-                                    
-                                    <div className="text-gray-dark">
-                                        {/* Tab content will go here */}
-                                        Content for {activeTab} tab
+
+                                    {/* Tables Container */}
+                                    <div className="space-y-6">
+                                        {/* Determine number of tables based on active tab */}
+                                        {activeTab === Strings.pastYear ? (
+                                            // 1 table for Past Year
+                                            <div className="border border-gray-light rounded-lg overflow-x-auto">
+                                                <table className="w-full text-sm border-collapse">
+                                                    <thead className="bg-gray-50">
+                                                        <tr>
+                                                            <th className="text-left px-4 py-3 font-semibold text-gray-dark border-b">Period</th>
+                                                            <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">Revenue</th>
+                                                            <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">EBIT</th>
+                                                            <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">Net Income</th>
+                                                            <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">EPS</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {[
+                                                            { period: 'FY 2024', revenue: '$5.2B', ebit: '$1.8B', ni: '$1.2B', eps: '$4.50' },
+                                                            { period: 'FY 2023', revenue: '$4.8B', ebit: '$1.6B', ni: '$1.0B', eps: '$3.85' },
+                                                            { period: 'FY 2022', revenue: '$4.2B', ebit: '$1.4B', ni: '$0.9B', eps: '$3.20' },
+                                                            { period: 'FY 2021', revenue: '$3.8B', ebit: '$1.2B', ni: '$0.8B', eps: '$2.75' },
+                                                        ].map((row, idx) => (
+                                                            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                                <td className="text-left px-4 py-3 text-gray-dark border-b">{row.period}</td>
+                                                                <td className="text-center px-4 py-3 text-gray-dark border-b">{row.revenue}</td>
+                                                                <td className="text-center px-4 py-3 text-gray-dark border-b">{row.ebit}</td>
+                                                                <td className="text-center px-4 py-3 text-gray-dark border-b">{row.ni}</td>
+                                                                <td className="text-center px-4 py-3 text-gray-dark border-b">{row.eps}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : activeTab === Strings.finalOutput ? (
+                                            // 13 tables for Final Output
+                                            <>
+                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((tableNum) => (
+                                                    <div key={tableNum} className="border border-gray-light rounded-lg overflow-x-auto">
+                                                        <h4 className="bg-gray-50 px-4 py-2 font-semibold text-gray-dark text-sm">
+                                                            Table {tableNum}: {['Valuation Summary', 'Cash Flow Analysis', 'Growth Metrics', 'Profitability', 'Market Multiples', 'Financial Ratios', 'Industry Comparison', 'Historical Trends', 'Risk Metrics', 'Capital Structure', 'Dividend Analysis', 'ESG Metrics', 'Investment Score'][tableNum - 1]}
+                                                        </h4>
+                                                        <table className="w-full text-sm border-collapse">
+                                                            <thead className="bg-gray-50">
+                                                                <tr>
+                                                                    <th className="text-left px-4 py-3 font-semibold text-gray-dark border-b">Metric</th>
+                                                                    <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">Value</th>
+                                                                    <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">Industry Avg</th>
+                                                                    <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">Rank</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {[
+                                                                    { metric: 'Metric A', value: '12.5%', avg: '10.2%', rank: 'Top 15%' },
+                                                                    { metric: 'Metric B', value: '$2.1B', avg: '$1.8B', rank: 'Top 20%' },
+                                                                    { metric: 'Metric C', value: '8.3x', avg: '9.1x', rank: 'Below Avg' },
+                                                                ].map((row, idx) => (
+                                                                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                                        <td className="text-left px-4 py-3 text-gray-dark border-b">{row.metric}</td>
+                                                                        <td className="text-center px-4 py-3 text-gray-dark border-b">{row.value}</td>
+                                                                        <td className="text-center px-4 py-3 text-gray-dark border-b">{row.avg}</td>
+                                                                        <td className="text-center px-4 py-3 text-gray-dark border-b">{row.rank}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            // 4 tables for other tabs
+                                            <>
+                                                {[1, 2, 3, 4].map((tableNum) => (
+                                                    <div key={tableNum} className="border border-gray-light rounded-lg overflow-x-auto">
+                                                        <h4 className="bg-gray-50 px-4 py-2 font-semibold text-gray-dark text-sm">
+                                                            Table {tableNum}: {activeTab} Analysis
+                                                        </h4>
+                                                        <table className="w-full text-sm border-collapse">
+                                                            <thead className="bg-gray-50">
+                                                                <tr>
+                                                                    <th className="text-left px-4 py-3 font-semibold text-gray-dark border-b">Category</th>
+                                                                    <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">2024</th>
+                                                                    <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">2023</th>
+                                                                    <th className="text-center px-4 py-3 font-semibold text-gray-dark border-b">Change %</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {[
+                                                                    { cat: 'Item 1', val24: '$1.2B', val23: '$1.0B', change: '+20%' },
+                                                                    { cat: 'Item 2', val24: '$0.8B', val23: '$0.7B', change: '+14%' },
+                                                                    { cat: 'Item 3', val24: '$0.5B', val23: '$0.6B', change: '-17%' },
+                                                                ].map((row, idx) => (
+                                                                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                                        <td className="text-left px-4 py-3 text-gray-dark border-b">{row.cat}</td>
+                                                                        <td className="text-center px-4 py-3 text-gray-dark border-b">{row.val24}</td>
+                                                                        <td className="text-center px-4 py-3 text-gray-dark border-b">{row.val23}</td>
+                                                                        <td className={`text-center px-4 py-3 border-b ${row.change.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                                                                            {row.change}
+                                                                        </td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* Fixed Export Buttons - Only show on Final Output */}
+                                {activeTab === Strings.finalOutput && (
+                                    <div className="fixed right-8 bottom-8 flex flex-col gap-3 z-50">
+                                        <button
+                                            onClick={() => {}}
+                                            className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors shadow-lg"
+                                            title="Export to CSV"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                            CSV
+                                        </button>
+                                        <button
+                                            onClick={() => {}}
+                                            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors shadow-lg"
+                                            title="Export to PDF"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                            </svg>
+                                            PDF
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}
@@ -457,6 +617,148 @@ function OverviewPage() {
                 onSubmit={handleFilterSubmit}
                 initialData={selectedStockIndex !== null ? stocks[selectedStockIndex].filterData : null}
             />
+
+            {/* Zoom Modal */}
+            {isZoomModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-auto backdrop-blur-xs">
+                    <style>{scrollbarStyles}</style>
+                    <div className="relative bg-white rounded-xl shadow-2xl max-w-6xl w-[95%] h-[90vh] flex flex-col overflow-hidden">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-gray-light flex-shrink-0 bg-white">
+                            <h2 className="text-lg font-semibold text-gray-dark">{activeTab}</h2>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setIsZoomModalOpen(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Minimize"
+                                >
+                                    <img
+                                        src={getImage('minimize')}
+                                        className="w-5 h-5"
+                                    />
+                                </button>
+                                <button
+                                    onClick={() => setIsZoomModalOpen(false)}
+                                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Close"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Modal Content with Scrolling */}
+                        <div className="zoom-modal-content overflow-y-auto overflow-x-auto flex-1 min-h-0 p-6">
+                            <div className="space-y-6">
+                                {/* Zoomed Tables - Same as overview but larger */}
+                                {activeTab === Strings.pastYear ? (
+                                    <div className="border border-gray-light rounded-lg overflow-x-auto">
+                                        <table className="w-full text-base border-collapse">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="text-left px-6 py-4 font-semibold text-gray-dark border-b">Period</th>
+                                                    <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">Revenue</th>
+                                                    <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">EBIT</th>
+                                                    <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">Net Income</th>
+                                                    <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">EPS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {[
+                                                    { period: 'FY 2024', revenue: '$5.2B', ebit: '$1.8B', ni: '$1.2B', eps: '$4.50' },
+                                                    { period: 'FY 2023', revenue: '$4.8B', ebit: '$1.6B', ni: '$1.0B', eps: '$3.85' },
+                                                    { period: 'FY 2022', revenue: '$4.2B', ebit: '$1.4B', ni: '$0.9B', eps: '$3.20' },
+                                                    { period: 'FY 2021', revenue: '$3.8B', ebit: '$1.2B', ni: '$0.8B', eps: '$2.75' },
+                                                ].map((row, idx) => (
+                                                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                        <td className="text-left px-6 py-4 text-gray-dark border-b">{row.period}</td>
+                                                        <td className="text-center px-6 py-4 text-gray-dark border-b">{row.revenue}</td>
+                                                        <td className="text-center px-6 py-4 text-gray-dark border-b">{row.ebit}</td>
+                                                        <td className="text-center px-6 py-4 text-gray-dark border-b">{row.ni}</td>
+                                                        <td className="text-center px-6 py-4 text-gray-dark border-b">{row.eps}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : activeTab === Strings.finalOutput ? (
+                                    <>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((tableNum) => (
+                                            <div key={tableNum} className="border border-gray-light rounded-lg overflow-x-auto">
+                                                <h4 className="bg-gray-50 px-6 py-3 font-semibold text-gray-dark">
+                                                    Table {tableNum}: {['Valuation Summary', 'Cash Flow Analysis', 'Growth Metrics', 'Profitability', 'Market Multiples', 'Financial Ratios', 'Industry Comparison', 'Historical Trends', 'Risk Metrics', 'Capital Structure', 'Dividend Analysis', 'ESG Metrics', 'Investment Score'][tableNum - 1]}
+                                                </h4>
+                                                <table className="w-full text-base border-collapse">
+                                                    <thead className="bg-gray-50">
+                                                        <tr>
+                                                            <th className="text-left px-6 py-4 font-semibold text-gray-dark border-b">Metric</th>
+                                                            <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">Value</th>
+                                                            <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">Industry Avg</th>
+                                                            <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">Rank</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {[
+                                                            { metric: 'Metric A', value: '12.5%', avg: '10.2%', rank: 'Top 15%' },
+                                                            { metric: 'Metric B', value: '$2.1B', avg: '$1.8B', rank: 'Top 20%' },
+                                                            { metric: 'Metric C', value: '8.3x', avg: '9.1x', rank: 'Below Avg' },
+                                                        ].map((row, idx) => (
+                                                            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                                <td className="text-left px-6 py-4 text-gray-dark border-b">{row.metric}</td>
+                                                                <td className="text-center px-6 py-4 text-gray-dark border-b">{row.value}</td>
+                                                                <td className="text-center px-6 py-4 text-gray-dark border-b">{row.avg}</td>
+                                                                <td className="text-center px-6 py-4 text-gray-dark border-b">{row.rank}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        {[1, 2, 3, 4].map((tableNum) => (
+                                            <div key={tableNum} className="border border-gray-light rounded-lg overflow-x-auto">
+                                                <h4 className="bg-gray-50 px-6 py-3 font-semibold text-gray-dark">
+                                                    Table {tableNum}: {activeTab} Analysis
+                                                </h4>
+                                                <table className="w-full text-base border-collapse">
+                                                    <thead className="bg-gray-50">
+                                                        <tr>
+                                                            <th className="text-left px-6 py-4 font-semibold text-gray-dark border-b">Category</th>
+                                                            <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">2024</th>
+                                                            <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">2023</th>
+                                                            <th className="text-center px-6 py-4 font-semibold text-gray-dark border-b">Change %</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {[
+                                                            { cat: 'Item 1', val24: '$1.2B', val23: '$1.0B', change: '+20%' },
+                                                            { cat: 'Item 2', val24: '$0.8B', val23: '$0.7B', change: '+14%' },
+                                                            { cat: 'Item 3', val24: '$0.5B', val23: '$0.6B', change: '-17%' },
+                                                        ].map((row, idx) => (
+                                                            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                                                <td className="text-left px-6 py-4 text-gray-dark border-b">{row.cat}</td>
+                                                                <td className="text-center px-6 py-4 text-gray-dark border-b">{row.val24}</td>
+                                                                <td className="text-center px-6 py-4 text-gray-dark border-b">{row.val23}</td>
+                                                                <td className={`text-center px-6 py-4 border-b ${row.change.includes('+') ? 'text-green-600' : 'text-red-600'}`}>
+                                                                    {row.change}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ))}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
 
     );
